@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">languageCompose</string>
+    <string name="title_activity_settings">EinstellungenAktivität</string>
+    <string name="hello_world">Hallo, Welt!</string>
+    <string name="change_lang">Sprache ändern</string>
+    <string name="selected_lang">Ausgewählte Sprache</string>
+    <string name="select_lang">Sprache auswählen</string>
+    <string name="english">Englisch</string>
+    <string name="spanish">Spanisch</string>
+    <string name="french">Französisch</string>
+    <string name="german">Deutsch</string>
+    <string name="dark_theme">Dunkles Thema</string>
+    <string name="light_theme">Helles Thema</string>
+    <string name="selected_theme">Ausgewähltes Thema</string>
+    <string name="select_theme">Thema auswählen</string>
+
+</resources>
