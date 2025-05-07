@@ -1,5 +1,6 @@
 package com.example.languagecompose
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.background
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Text
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -34,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import java.util.Locale
 
 class SettingsViewModel(private val context: Context) : ViewModel() {
 
@@ -56,6 +59,17 @@ class SettingsViewModel(private val context: Context) : ViewModel() {
     fun setLanguage(newLanguage: String) {
         _language.value = newLanguage // Actualiza el LiveData
         sharedPreferences.edit().putString("language", newLanguage).apply() // Actualiza el LiveData
+    }
+
+    fun setLocale(context: Context, languageCode: String) {
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+        val config = context.resources.configuration
+        config.setLocale(locale)
+
+        context.resources.updateConfiguration(config, context.resources.displayMetrics)
+
+        (context as? Activity)?.recreate() // Importante para que el idioma cambie inmediatamente
     }
 
 
@@ -137,7 +151,7 @@ fun LanguageSettings(viewModel: SettingsViewModel) {
                             onClick = {
                                 viewModel.setLanguage(language)
                                 // Aplicar el idioma y recrear la actividad
-                                App.setLocale(context, language)
+                                viewModel.setLocale(context, language)
                                 expanded = false // Cerrar el menú después de seleccionar
                                 //(context as? Activity)?.recreate() // Recrear la actividad
                             }
@@ -160,12 +174,13 @@ fun DropDownButton(text: String, onClick: () -> Unit){
                 pressedElevation = -2.dp
             )
             , shape = MaterialTheme.shapes.small
-            , contentPadding = PaddingValues(2.dp)
+            , contentPadding = PaddingValues(horizontal = 1.dp, vertical = 1.dp)
             , colors = ButtonDefaults.textButtonColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
-            //  , modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer)
+            , modifier = Modifier.widthIn(min = 120.dp)
+
         ) {
             Text(
                 text = text

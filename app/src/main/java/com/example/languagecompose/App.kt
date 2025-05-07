@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import java.util.Locale
 
 /*
@@ -48,6 +49,7 @@ class App : Application() {
 
             return setLocale(context, language)
         }
+
 
         // Actualiza la configuración del idioma
         fun setLocale(context: Context, language: String): Context {

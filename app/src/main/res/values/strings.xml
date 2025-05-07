@@ -5,12 +5,18 @@
     <string name="change_lang">Change Language</string>
     <string name="selected_lang">Selected language</string>
     <string name="select_lang">Select language</string>
-    <string name="english">English</string>
-    <string name="spanish">Spanish</string>
-    <string name="french">French</string>
-    <string name="german">German</string>
+    <string name="english" translatable="false">English</string>
+    <string name="spanish" translatable="false">Spanish</string>
+    <string name="french" translatable="false">French</string>
+    <string name="german" translatable="false">German</string>
     <string name="dark_theme">Dark Theme</string>
     <string name="light_theme">Light Theme</string>
     <string name="selected_theme">Selected Theme</string>
     <string name="select_theme">Select Theme</string>
+    <string name="reset_position">Reset Position</string>
+    <string name="status_idle">Idle</string>
+    <string name="status_moving">Moving</string>
+    <string name="status_label">Status:</string>
+    <string name="settings">Settings</string>
+    <string name="close">Close</string>
 </resources>

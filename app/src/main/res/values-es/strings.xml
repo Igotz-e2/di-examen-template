@@ -13,4 +13,10 @@
     <string name="light_theme">Tema claro</string>
     <string name="selected_theme">Tema seleccionado</string>
     <string name="select_theme">Seleccionar tema</string>
+    <string name="reset_position">Reiniciar posición</string>
+    <string name="status_idle">Inactivo</string>
+    <string name="status_moving">Moviendo</string>
+    <string name="status_label">Estado:</string>
+    <string name="settings">Configuraciones</string>
+    <string name="close">Cerrar</string>
 </resources>

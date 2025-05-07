@@ -8,12 +8,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -24,6 +33,7 @@ import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -93,6 +103,8 @@ fun Level(){
     // Inicializar el viewModel del mapa
     val levelVM = LevelViewModel()
 
+    val context = LocalContext.current
+
     // Inicializar el viewModel de los controles
     val hudVM: HudViewModel = HudViewModel()
 
@@ -100,55 +112,81 @@ fun Level(){
     val characterVM: CharacterViewModel = CharacterViewModel(CharacterState.IDLE)
 
     // Inicializar el viewModel de las configuraciones
-    val settingsVM: SettingsViewModel = SettingsViewModel(LocalContext.current)
+    val settingsVM = SettingsViewModel(context)
+
+    var showSettings by remember { mutableStateOf(false) }
 
     val scale by levelVM.scale.observeAsState(1f)
 
     FondoGradienteRadial(color = Color(0xFF87CEEB))
 
-    // Medir el tamaño real del contenedor donde se dibujará la escena
     BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         val containerWidthDp = this.maxWidth
         val containerHeightDp = this.maxHeight
 
-        // Calculamos la escala tan pronto sepamos las dimensiones
         levelVM.setScale(containerWidthDp, containerHeightDp)
 
-        Log.d("Level", "Scale: $scale")
-        Log.d("Level", "Container width: ${containerWidthDp}}")
-        Log.d("Level", "Container height: ${containerHeightDp}")
+        Box(modifier = Modifier.fillMaxSize()) {
 
-        // Contenedor principal a tamaño completo
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center  // Centramos el contenido escalado
-        ) {
-            // Esta Box se dibuja con el tamaño escalado de nuestra escena lógica
+            // Contenedor del mapa y personaje
             Box(
                 modifier = Modifier
-                    .size(LevelConstants.sceneWidthDp * scale, LevelConstants.sceneHeightDp * scale)
-                    .offset(x = 0.dp, y = -((containerHeightDp - LevelConstants.sceneHeightDp * scale) / 2) * 0.3f)
-                    .border(3.dp, Color.Red)
-                    .background(Color.hsv(0f, 0f, 1f, 0.3f))
-                    .graphicsLayer {
-                        // Opcional: rotaciones, traslaciones, etc.
-                    }
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                // Dibuja tu mapa “dentro” de este tamaño escalado
-                MazeWallsView(MazeConfig.mazeData)
-                // Dibuja el personaje en su posición escalada
-                CharacterView(characterVM, scale)
+                Box(
+                    modifier = Modifier
+                        .size(LevelConstants.sceneWidthDp * scale, LevelConstants.sceneHeightDp * scale)
+                        .offset(x = 0.dp, y = -((containerHeightDp - LevelConstants.sceneHeightDp * scale) / 2) * 0.3f)
+                        .border(3.dp, Color.Red)
+                        .background(Color.hsv(0f, 0f, 1f, 0.3f))
+                        .graphicsLayer { }
+                ) {
+                    MazeWallsView(MazeConfig.mazeData)
+                    CharacterView(characterVM, scale)
+                }
+
+                HudView(hudVM)
             }
 
-            // HUD (joystick) se superpone en pantalla completa,
-            // normalmente sin “scale”, porque es un UI overlay.
-            HudView(hudVM)
-        }
+            // Botón de ajustes sobre todo lo demás
+            IconButton(
+                onClick = { showSettings = true },
+                modifier = Modifier
+                    .size(48.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.settings),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
 
+            // Mostrar pantalla de configuración si está activa
+            if (showSettings) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(16.dp)
+                ) {
+                    SettingsScreen(viewModel = settingsVM)
+                    IconButton(
+                        onClick = { showSettings = false },
+                        modifier = Modifier.align(Alignment.TopEnd)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.close)
+                        )
+                    }
+                }
+            }
+        }
     }
 
     // Inicializamos la recolección del joystick (lo ideal es hacerlo solo una vez).

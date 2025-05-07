@@ -13,5 +13,10 @@
     <string name="light_theme">Helles Thema</string>
     <string name="selected_theme">Ausgewähltes Thema</string>
     <string name="select_theme">Thema auswählen</string>
-
+    <string name="reset_position">Position zurücksetzen</string>
+    <string name="status_idle">Inaktiv</string>
+    <string name="status_moving">Bewege</string>
+    <string name="status_label">Status:</string>
+    <string name="settings">Einstellungen</string>
+    <string name="close">Schließen</string>
 </resources>

@@ -5,16 +5,25 @@ package com.example.languagecompose
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -56,6 +65,9 @@ class CharacterViewModel(
     // Tamaño "lógico" del personaje
     val characterDiameter = 25f
 
+
+    private var joystickState = JoystickState(0f, 0f, 0f)
+
     /**
      * Llamar a esta función para que el CharacterViewModel
      * empiece a observar el LiveData del joystick y aplicar
@@ -63,16 +75,15 @@ class CharacterViewModel(
      *
      * @param joystickLiveData LiveData<JoystickState> proveniente del HudViewModel
      */
+
     fun startCollectingJoystick(joystickLiveData: LiveData<JoystickState>) {
 
         // 1) Observar los cambios del joystick
         // 2) Iniciar la simulación con un "game loop"
-        var joystickState = JoystickState(0f, 0f, 0f)
 
         // Observamos el LiveData (puedes usar Flow o StateFlow si lo prefieres)
-        joystickLiveData.observeForever { newState ->
-            Log.d("CharacterViewModel", "JoystickState: $newState")
-            joystickState = newState
+        joystickLiveData.observeForever {
+            joystickState = it
         }
 
         // Lanzamos una corrutina que actualiza la física ~60 veces por segundo
@@ -136,13 +147,10 @@ class CharacterViewModel(
                 _characterY.postValue(finalY)
 
                 // Actualizar estado (IDLE si casi no hay movimiento)
-                _currentState.value = if (speed == 0f) {
-                        CharacterState.IDLE
-                    } else {
-                        CharacterState.MOVING
-                    }
+                _currentState.value = if (speed == 0f) CharacterState.IDLE else CharacterState.MOVING
             }
         }
+
     }
 }
 
@@ -154,28 +162,51 @@ fun CharacterPreview() {
 
 @Composable
 fun CharacterView(characterViewModel: CharacterViewModel, scale: Float) {
-    val x by characterViewModel.characterX.observeAsState(170f)  // centro X
-    val y by characterViewModel.characterY.observeAsState(500f)  // centro Y
+    // Observamos coordenadas y estado actual
+    val x by characterViewModel.characterX.observeAsState(170f)
+    val y by characterViewModel.characterY.observeAsState(500f)
+    val state by characterViewModel.currentState.collectAsState()
 
-    // Radio "lógico"
-    val logicalRadius = 12.5f  // 25 / 2
-    // Radio escalado a dp
+    // Radio del personaje
+    val logicalRadius = 12.5f // 25 / 2
     val scaledRadiusDp = (logicalRadius * scale).dp
 
-    // El offset real debe restar el radio para que la Box se dibuje centrada
+    // Offset visual (ajustamos para que se dibuje centrado)
     val offsetX = (x * scale).dp - scaledRadiusDp
     val offsetY = (y * scale).dp - scaledRadiusDp
 
-    Box(
-        modifier = Modifier
-            .offset(x = offsetX, y = offsetY)
-            .size((25 * scale).dp)           // Diámetro total
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawCircle(
-                color = Color.Red.copy(alpha = 1f),
-                radius = size.minDimension / 2   // Mitad del lado => radio
-            )
+    // Color dinámico según el estado
+    val color = when (state) {
+        CharacterState.IDLE -> Color.Blue
+        CharacterState.MOVING -> Color.Red
+    }
+    val stateText = when (state) {
+        CharacterState.IDLE -> stringResource(id = R.string.status_idle)
+        CharacterState.MOVING -> stringResource(id = R.string.status_moving)
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        Box(
+            modifier = Modifier
+                .offset(x = offsetX, y = offsetY)
+                .size((25 * scale).dp)
+        ) {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                drawCircle(
+                    color = color,
+                    radius = size.minDimension / 2
+                )
+            }
         }
+
+        Text(
+            text = "${stringResource(R.string.status_label)} $stateText",
+            modifier = Modifier
+                .fillMaxHeight(0.1f)
+                .align(Alignment.BottomEnd)
+                .height(60.dp)
+                .padding(20.dp),
+            color = Color.Black
+        )
     }
 }
